@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="LogoICRCV.png">
+  <link rel="icon" type="image/png" href="LogoICRCV.png" sizes="32x32">
+  <link rel="apple-touch-icon" href="LogoICRCV.png" sizes="180x180">
+  <title>ICRCV Avance de Hermanos</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      text-align: center;
+      padding: 20px;
+      transition: background 0.3s, color 0.3s;
+    }
+    h1 {
+      color: #333;
+    }
+    h6 {
+      color: #8f9797;
+      text-align: left;
+    }
+    input {
+      padding: 8px;
+      width: 250px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      margin-left: 10px;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 5px;
+      background: #4CAF50;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    table {
+      margin: 20px auto;
+      border-collapse: collapse;
+      width: 90%;
+      background: #fff;
+      box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
+      transition: background 0.3s, color 0.3s;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 12px;
+      text-align: center;
+    }
+    th {
+      background: #4CAF50;
+      color: white;
+    }
+    tr:nth-child(even) {
+      background: #f2f2f2;
+    }
+    .loading {
+      font-size: 18px;
+      color: #555;
+    }
+    .progress-container {
+      width: 100%;
+      background-color: #eee;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 20px;
+      background-color: #4CAF50;
+      text-align: center;
+      color: white;
+      font-size: 12px;
+      line-height: 20px;
+      transition: width 0.5s;
+    }
+
+    /* 🌙 MODO OSCURO */
+    body.dark-mode {
+      background: #121212;
+      color: #f1f1f1;
+    }
+    body.dark-mode h1 {
+      color: #fff;
+    }
+    body.dark-mode input {
+      background: #333;
+      color: #fff;
+      border: 1px solid #555;
+    }
+    body.dark-mode table {
+      background: #1e1e1e;
+      color: #fff;
+    }
+    body.dark-mode th {
+      background: #2e7d32;
+    }
+    body.dark-mode tr:nth-child(even) {
+      background: #2a2a2a;
+    }
+    body.dark-mode .progress-container {
+      background-color: #333;
+    }
+  </style>
+</head>
+<body>
+    <h6>v 1.0.0</h6>
+  <h1>📖 Avance de Hermanos</h1>
+
+  <!-- 🔎 Buscador + 🌙 Botón modo oscuro -->
+  <input type="text" id="buscador" placeholder="Buscar por nombre..." onkeyup="filtrarTabla()">
+  <button onclick="toggleDarkMode()">🌙 Modo Oscuro</button>
+
+  <div id="mensaje" class="loading">Cargando datos...</div>
+  <table id="tabla" style="display:none;">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Libro</th>
+        <th>Capítulo</th>
+        <th>Porcentaje</th>
+      </tr>
+    </thead>
+    <tbody id="tabla-body"></tbody>
+  </table>
+
+  <script>
+    const url = "https://script.google.com/macros/s/AKfycbxQZAS0j946bCHZk9zt0BL-CbWKwlwo7y2S9z10B5o7hVm9kZBoL35gVqgdZIqBPFpKLQ/exec";
+
+    async function cargarDatos() {
+      try {
+        const respuesta = await fetch(url);
+        const datos = await respuesta.json();
+
+        document.getElementById("mensaje").style.display = "none";
+        const tabla = document.getElementById("tabla");
+        tabla.style.display = "table";
+
+        const tbody = document.getElementById("tabla-body");
+        tbody.innerHTML = ""; // limpiar antes de cargar
+
+        const lista = Array.isArray(datos) ? datos : [datos];
+
+        lista.forEach(item => {
+          const fila = document.createElement("tr");
+          fila.innerHTML = `
+            <td>${item.nombre}</td>
+            <td>${item.libro}</td>
+            <td>${item.capitulo}</td>
+            <td>
+              <div class="progress-container">
+                <div class="progress-bar" style="width:${item.porcentaje}%">
+                  ${item.porcentaje}%
+                </div>
+              </div>
+            </td>
+          `;
+          tbody.appendChild(fila);
+        });
+
+      } catch (error) {
+        document.getElementById("mensaje").textContent = "❌ Error al cargar los datos";
+        console.error(error);
+      }
+    }
+
+    // 🔄 Refrescar datos cada 10 segundos
+    setInterval(cargarDatos, 10000);
+
+    // 🔎 Filtrar por nombre
+    function filtrarTabla() {
+      const filtro = document.getElementById("buscador").value.toLowerCase();
+      const filas = document.querySelectorAll("#tabla-body tr");
+
+      filas.forEach(fila => {
+        const nombre = fila.cells[0].textContent.toLowerCase();
+        fila.style.display = nombre.includes(filtro) ? "" : "none";
+      });
+    }
+
+    // 🌙 Activar/Desactivar modo oscuro
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark-mode");
+    }
+
+    cargarDatos();
+  </script>
+</body>
+</html>
